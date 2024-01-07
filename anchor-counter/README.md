@@ -1,0 +1,4 @@
+-   Run the rust unit tests with `cargo test-sbf`
+-   Run the typescript tests with `anchor test`
+-   Can use None as the processor and will still be fine with cargo test-sbf (this confused me for a long time and I still don't really understand why it complains about the typing when I try to use the processor! macro, but whatever)
+-   Took the load_and_deserialize with the type generic from the MarginFi test suite
