@@ -29,8 +29,7 @@ async fn test_initialize() {
     };
 
     let mut init_tx = Transaction::new_with_payer(&[init_ix], Some(&user.pubkey()));
-    let recent_blockhash = context.last_blockhash;
-    init_tx.partial_sign(&[&user], recent_blockhash);
+    init_tx.partial_sign(&[&user], context.last_blockhash);
 
     context
         .banks_client
@@ -47,7 +46,7 @@ async fn test_initialize() {
 async fn test_increment() {
     let SetUpTest {
         validator,
-        user,
+        user: _,
         counter_pda,
     } = set_up_test();
 
@@ -57,7 +56,7 @@ async fn test_increment() {
         program_id: anchor_counter::ID,
         accounts: anchor_counter::accounts::Initialize {
             counter: counter_pda,
-            user: user.pubkey(),
+            user: context.payer.pubkey(),
             system_program: system_program::ID,
         }
         .to_account_metas(None),
@@ -68,22 +67,20 @@ async fn test_increment() {
         program_id: anchor_counter::ID,
         accounts: anchor_counter::accounts::Increment {
             counter: counter_pda,
-            user: user.pubkey(),
+            user: context.payer.pubkey(),
         }
         .to_account_metas(None),
         data: anchor_counter::instruction::Increment {}.data(),
     };
 
     let mut init_increment_tx =
-        Transaction::new_with_payer(&[init_ix, increment_ix], Some(&user.pubkey()));
-    let recent_blockhash = context.last_blockhash;
-    init_increment_tx.partial_sign(&[&user], recent_blockhash);
+        Transaction::new_with_payer(&[init_ix, increment_ix], Some(&context.payer.pubkey()));
+    init_increment_tx.partial_sign(&[&context.payer], context.last_blockhash);
 
-    context
+    let _res = context
         .banks_client
         .process_transaction(init_increment_tx)
-        .await
-        .unwrap();
+        .await;
 
     let counter: anchor_counter::Counter = load_and_deserialize(context, counter_pda).await;
 
@@ -91,7 +88,7 @@ async fn test_increment() {
 }
 
 #[tokio::test]
-async fn test_double_increment() {
+async fn test_double_increment() -> anyhow::Result<()> {
     let SetUpTest {
         validator,
         user,
@@ -123,26 +120,32 @@ async fn test_double_increment() {
 
     let increment_ix_2 = increment_ix.clone();
 
-    let mut init_increment_tx = Transaction::new_with_payer(
+    let init_increment_tx = Transaction::new_signed_with_payer(
         &[init_ix, increment_ix, increment_ix_2],
         Some(&user.pubkey()),
+        &[&user],
+        context.last_blockhash,
     );
-    let recent_blockhash = context.last_blockhash;
-    init_increment_tx.partial_sign(&[&user], recent_blockhash);
 
-    context
+    let _res = context
         .banks_client
         .process_transaction(init_increment_tx)
-        .await
-        .unwrap();
+        .await;
 
     let counter: anchor_counter::Counter = load_and_deserialize(context, counter_pda).await;
 
     assert_eq!(counter.count, 2);
+
+    Ok(())
 }
 
-//UTILITY STUFF
+#[tokio::test]
+async fn test_multi_signer() -> anyhow::Result<()> {
+    Ok(())
+}
 
+/// Struct set up to hold the validator, an optional user account, and the counter PDA.
+/// Returned from the set_up_test() function
 pub struct SetUpTest {
     pub validator: ProgramTest,
     pub user: Keypair,
@@ -171,6 +174,8 @@ pub fn set_up_test() -> SetUpTest {
     }
 }
 
+/// Fetch the account from the ProgramTestContext and deserialize it.
+/// Taken from the MarginFi Github tests: https://github.com/mrgnlabs/marginfi-v2/blob/main/test-utils/src/test.rs#L468
 pub async fn load_and_deserialize<T: AccountDeserialize>(
     mut ctx: ProgramTestContext,
     address: Pubkey,
@@ -179,8 +184,8 @@ pub async fn load_and_deserialize<T: AccountDeserialize>(
         .banks_client
         .get_account(address)
         .await
-        .unwrap()
-        .unwrap();
+        .unwrap() //unwraps the Result into an Option<Account>
+        .unwrap(); //unwraps the Option<Account> into an Account
 
     T::try_deserialize(&mut account.data.as_slice()).unwrap()
 }

@@ -192,6 +192,7 @@ name = "anchor-counter"
 version = "0.1.0"
 dependencies = [
  "anchor-lang",
+ "anyhow",
  "solana-program",
  "solana-program-test",
  "solana-sdk",
