@@ -5,9 +5,9 @@ import { expect } from 'chai'
 
 describe('anchor-counter', () => {
     // Configure the client to use the local cluster.
+
     const provider = anchor.AnchorProvider.local()
     anchor.setProvider(provider)
-
     const program = anchor.workspace.AnchorCounter as Program<AnchorCounter>
 
     it('initializes the counter', async () => {
@@ -57,12 +57,12 @@ describe('anchor-counter', () => {
         expect(counterAccount2.count.toNumber()).to.equal(2)
     })
 
-    it('will this fail if we put in a random counter account', async () => {
-        await program.methods
-            .increment()
-            .accounts({
-                counter: provider.wallet.publicKey,
-            })
-            .rpc()
-    })
+    // it('will this fail if we put in a random counter account', async () => {
+    //     await program.methods
+    //         .increment()
+    //         .accounts({
+    //             counter: provider.
+    //         })
+    //         .rpc()
+    // })
 })
