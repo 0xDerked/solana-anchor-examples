@@ -152,10 +152,17 @@ pub struct SetUpTest {
     pub counter_pda: Pubkey,
 }
 
+/// Utility function to set up the test environment
+/// Returns the validator, an optional funded user account, and the counter PDA
 pub fn set_up_test() -> SetUpTest {
-    let mut validator = ProgramTest::default();
-    validator.add_program("anchor_counter", anchor_counter::ID, None);
+    //Both of these work
 
+    // let mut validator = ProgramTest::default();
+    // validator.add_program("anchor_counter", anchor_counter::ID, None);
+    let mut validator = ProgramTest::new("anchor_counter", anchor_counter::ID, None);
+
+    //create a new user and fund with 1 SOL
+    //add the user to the validator / ledger
     let user = Keypair::new();
     validator.add_account(
         user.pubkey(),
@@ -165,7 +172,7 @@ pub fn set_up_test() -> SetUpTest {
         },
     );
 
-    //get the counter PDA
+    //get the counter PDA -- uses the same seed we used in the anchor program
     let (counter_pda, _) = Pubkey::find_program_address(&[b"counter"], &anchor_counter::ID);
     SetUpTest {
         validator,
