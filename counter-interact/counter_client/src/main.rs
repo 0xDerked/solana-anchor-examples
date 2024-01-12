@@ -123,10 +123,7 @@ fn increment(
     user: &Keypair,
     program_id: Pubkey,
 ) -> anyhow::Result<Signature> {
-    let increment_keys = IncrementKeys::from([
-        *counter_pda,  //counter
-        user.pubkey(), //user
-    ]);
+    let increment_keys = IncrementKeys::from([*counter_pda, user.pubkey()]);
 
     let ix = increment_ix_with_program_id(program_id, increment_keys)?;
     let recent_blockhash = rpc.get_latest_blockhash()?;
