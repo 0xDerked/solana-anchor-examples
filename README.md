@@ -57,3 +57,15 @@ This is just a dump of resources I found helpful in doing this. Some of these ar
 # Disclaimer
 
 Obviously these examples are not audited code. They are built from my own learning and patching together of resources.
+
+# Random Set Up Notes
+
+If you are opening this in VSCode from the root folder, you may need to edit the rust analyzer settings so it works with all of the projects. You can do this by editing the linked projects settings in the user JSON preferences. Add the following:
+
+```
+  "rust-analyzer.linkedProjects": [
+    "./anchor-counter/Cargo.toml",
+    "./counter-interact/anchor_counter_interface/Cargo.toml",
+    "./counter-interact/counter_client/Cargo.toml"
+  ]
+```

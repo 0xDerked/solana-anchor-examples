@@ -1,0 +1,14 @@
+[package]
+name = "anchor_counter_interface"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies.borsh]
+version = "^0.10"
+
+[dependencies.serde]
+optional = true
+version = "^1.0"
+
+[dependencies.solana-program]
+version = "^1.16"
