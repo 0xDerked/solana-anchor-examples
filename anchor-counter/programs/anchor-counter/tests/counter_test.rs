@@ -13,7 +13,7 @@ async fn test_initialize() {
         validator,
         user,
         counter_pda,
-    } = set_up_test();
+    } = SetUpTest::new();
 
     let mut context = validator.start_with_context().await;
 
@@ -28,8 +28,12 @@ async fn test_initialize() {
         data: anchor_counter::instruction::Initialize {}.data(),
     };
 
-    let mut init_tx = Transaction::new_with_payer(&[init_ix], Some(&user.pubkey()));
-    init_tx.partial_sign(&[&user], context.last_blockhash);
+    let init_tx = Transaction::new_signed_with_payer(
+        &[init_ix],
+        Some(&user.pubkey()),
+        &[&user],
+        context.last_blockhash,
+    );
 
     context
         .banks_client
@@ -48,7 +52,7 @@ async fn test_increment() {
         validator,
         user: _,
         counter_pda,
-    } = set_up_test();
+    } = SetUpTest::new();
 
     let mut context = validator.start_with_context().await;
 
@@ -73,9 +77,12 @@ async fn test_increment() {
         data: anchor_counter::instruction::Increment {}.data(),
     };
 
-    let mut init_increment_tx =
-        Transaction::new_with_payer(&[init_ix, increment_ix], Some(&context.payer.pubkey()));
-    init_increment_tx.partial_sign(&[&context.payer], context.last_blockhash);
+    let init_increment_tx = Transaction::new_signed_with_payer(
+        &[init_ix, increment_ix],
+        Some(&context.payer.pubkey()),
+        &[&context.payer],
+        context.last_blockhash,
+    );
 
     let _res = context
         .banks_client
@@ -93,7 +100,7 @@ async fn test_double_increment() -> anyhow::Result<()> {
         validator,
         user,
         counter_pda,
-    } = set_up_test();
+    } = SetUpTest::new();
 
     let mut context = validator.start_with_context().await;
 
@@ -139,45 +146,42 @@ async fn test_double_increment() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[tokio::test]
-async fn test_multi_signer() -> anyhow::Result<()> {
-    Ok(())
-}
-
 /// Struct set up to hold the validator, an optional user account, and the counter PDA.
-/// Returned from the set_up_test() function
+/// Use SetUpTest::new() to create a new instance.
 pub struct SetUpTest {
     pub validator: ProgramTest,
     pub user: Keypair,
     pub counter_pda: Pubkey,
 }
 
-/// Utility function to set up the test environment
 /// Returns the validator, an optional funded user account, and the counter PDA
-pub fn set_up_test() -> SetUpTest {
-    //Both of these work
+impl SetUpTest {
+    pub fn new() -> Self {
+        //Both of these work
 
-    // let mut validator = ProgramTest::default();
-    // validator.add_program("anchor_counter", anchor_counter::ID, None);
-    let mut validator = ProgramTest::new("anchor_counter", anchor_counter::ID, None);
+        // let mut validator = ProgramTest::default();
+        // validator.add_program("anchor_counter", anchor_counter::ID, None);
+        let mut validator = ProgramTest::new("anchor_counter", anchor_counter::ID, None);
 
-    //create a new user and fund with 1 SOL
-    //add the user to the validator / ledger
-    let user = Keypair::new();
-    validator.add_account(
-        user.pubkey(),
-        Account {
-            lamports: 1_000_000_000,
-            ..Account::default()
-        },
-    );
+        //create a new user and fund with 1 SOL
+        //add the user to the validator / ledger
+        let user = Keypair::new();
+        validator.add_account(
+            user.pubkey(),
+            Account {
+                lamports: 1_000_000_000,
+                ..Account::default()
+            },
+        );
 
-    //get the counter PDA -- uses the same seed we used in the anchor program
-    let (counter_pda, _) = Pubkey::find_program_address(&[b"counter"], &anchor_counter::ID);
-    SetUpTest {
-        validator,
-        user,
-        counter_pda,
+        //get the counter PDA -- uses the same seed we used in the anchor program
+        let (counter_pda, _) = Pubkey::find_program_address(&[b"counter"], &anchor_counter::ID);
+
+        Self {
+            validator,
+            user,
+            counter_pda,
+        }
     }
 }
 

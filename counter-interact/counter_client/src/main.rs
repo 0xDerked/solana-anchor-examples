@@ -13,7 +13,7 @@ use std::path::{self, Path};
 use std::str::FromStr;
 
 fn main() -> anyhow::Result<()> {
-    /*SET THESE TO YOUR VALUES OR READ FROM*/
+    /*SET THESE TO YOUR VALUES OR READ FROM ENV*/
     let path_to_keypair = path::Path::new("/home/derked/.config/solana/id.json");
     let program_id = "CQ2VvuR8Du2WQq1XWmzBKxmK4arc7BVReWMxUMW3nJs5";
     let rpc_url = "http://localhost:8899";
