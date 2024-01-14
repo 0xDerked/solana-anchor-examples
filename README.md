@@ -33,6 +33,10 @@ Each subfolder / project should be able to run standalone. Each subfolder has it
 
 This is a learning repo so my own understanding of things is not perfect. I'm simply sharing what seems to have worked for me. If you are an experienced Solana developer, please feel free to correct my mistakes by opening a PR or reaching out to me on Discord or Twitter.
 
+# Future
+
+Now that I'm over the initial learning curve, I'll probably just jump straight into my own projects. However, if I find something sparsely documented that I eventually figure out, I may add it here as a reference/example for the future.
+
 # Resources Used
 
 This is just a dump of resources I found helpful in doing this. Some of these are a few years old, and I had to patch together a lot of different things to get things working. My primary advice is to join Discords and spam questions as they are the best feedback loop. Also just reading the source for a lot of stuff will give you a general idea of how to do things.
@@ -43,6 +47,7 @@ This is just a dump of resources I found helpful in doing this. Some of these ar
 - [Helius Discord](https://discord.gg/64jS95f2ac)
 - [Lighthouse Github](https://github.com/Jac0xb/lighthouse)
 - [Margin Fi Github](https://github.com/mrgnlabs/marginfi-v2/tree/main)
+- [Solares Github](https://github.com/igneous-labs/solores)
 - [Solana Official Docs](https://docs.solana.com/introduction)
 - [Solana Dev Course](https://www.soldev.app/course)
 - [Solana Cookbook](https://solanacookbook.com/core-concepts/accounts.html#facts)
