@@ -1,0 +1,8 @@
+{
+  "rust-analyzer.linkedProjects": [
+    "./anchor-counter/Cargo.toml",
+    "./counter-interact/anchor_counter_interface/Cargo.toml",
+    "./counter-interact/counter_client/Cargo.toml",
+    "./jup-swap/Cargo.toml"
+  ]
+}

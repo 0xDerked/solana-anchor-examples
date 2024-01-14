@@ -3,6 +3,7 @@ use anchor_lang::{
     solana_program::{self},
     system_program, AccountDeserialize, InstructionData, ToAccountMetas,
 };
+use anyhow::Ok;
 use solana_program::instruction::Instruction;
 use solana_program_test::{tokio, ProgramTest, ProgramTestContext};
 use solana_sdk::{account::Account, signature::Keypair, signer::Signer, transaction::Transaction};
@@ -146,6 +147,44 @@ async fn test_double_increment() -> anyhow::Result<()> {
     Ok(())
 }
 
+#[tokio::test]
+async fn test_bogus_counter_acct() -> anyhow::Result<()> {
+    let SetUpTest {
+        validator,
+        user,
+        counter_pda,
+    } = SetUpTest::new();
+
+    let mut context = validator.start_with_context().await;
+
+    initialize(&mut context, &user, &counter_pda).await?;
+
+    //let (bogus_pda, _) = Pubkey::find_program_address(&[b"counter_bad"], &anchor_counter::ID);
+
+    let increment_ix = Instruction {
+        program_id: anchor_counter::ID,
+        accounts: anchor_counter::accounts::Increment {
+            counter: user.pubkey(), /*bogus_pda*/
+            user: user.pubkey(),
+        }
+        .to_account_metas(None),
+        data: anchor_counter::instruction::Increment {}.data(),
+    };
+
+    let increment_tx = Transaction::new_signed_with_payer(
+        &[increment_ix],
+        Some(&user.pubkey()),
+        &[&user],
+        context.last_blockhash,
+    );
+
+    let res = context.banks_client.process_transaction(increment_tx).await;
+
+    assert!(res.is_err());
+
+    Ok(())
+}
+
 /// Struct set up to hold the validator, an optional user account, and the counter PDA.
 /// Use SetUpTest::new() to create a new instance.
 pub struct SetUpTest {
@@ -183,6 +222,36 @@ impl SetUpTest {
             counter_pda,
         }
     }
+}
+
+///Function that initializes the counter account
+///Useful for testing things you want to fail but need to initialize the counter account first
+pub async fn initialize(
+    ctx: &mut ProgramTestContext,
+    user: &Keypair,
+    counter_pda: &Pubkey,
+) -> anyhow::Result<()> {
+    let init_ix = Instruction {
+        program_id: anchor_counter::ID,
+        accounts: anchor_counter::accounts::Initialize {
+            counter: *counter_pda,
+            user: user.pubkey(),
+            system_program: system_program::ID,
+        }
+        .to_account_metas(None),
+        data: anchor_counter::instruction::Initialize {}.data(),
+    };
+
+    let init_tx = Transaction::new_signed_with_payer(
+        &[init_ix],
+        Some(&user.pubkey()),
+        &[&user],
+        ctx.last_blockhash,
+    );
+
+    ctx.banks_client.process_transaction(init_tx).await.unwrap();
+
+    Ok(())
 }
 
 /// Fetch the account from the ProgramTestContext and deserialize it.

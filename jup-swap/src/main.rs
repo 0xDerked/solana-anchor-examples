@@ -37,7 +37,7 @@ async fn main() -> anyhow::Result<()> {
     };
 
     let quote_response = jup_swap_client.quote(&quote_request).await?;
-    println!("Quote: {:?}", quote_response);
+    println!("got quote response, getting swap response ... ");
 
     let swap_reponse = jup_swap_client
         .swap(&SwapRequest {
@@ -47,14 +47,14 @@ async fn main() -> anyhow::Result<()> {
         })
         .await?;
 
-    println!("Got swap response, sending tx");
+    println!("got swap response, sending tx ...");
 
     let versioned_tx: VersionedTransaction = bincode::deserialize(&swap_reponse.swap_transaction)?;
     let signed_tx = VersionedTransaction::try_new(versioned_tx.message, &[&wallet])?;
 
     let sig = rpc_client.send_and_confirm_transaction(&signed_tx).await?;
 
-    println!("Tx Successful with Signature: {:?}", sig);
+    println!("tx successful with signature: {:?}", sig);
 
     Ok(())
 }
